@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+  stopit:
+    image: stopit:last
+    ports:
+      - "8080:8080"
+    volumes:
+      - your-storage-here:/opt/app/data/storage

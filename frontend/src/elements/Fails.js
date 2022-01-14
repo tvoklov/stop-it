@@ -1,0 +1,65 @@
+import React, { useEffect, useState } from 'react'
+import { fetchFromApi } from '../util/Fetching'
+import { toGoodFormat } from '../util/Date'
+import moment from 'moment'
+
+export function Fails({ }) {
+    const loadStep = 50
+    const [lines, setLines] = useState([])
+    const [lastOffset, setLastOffset] = useState(0)
+    const [anyLeft, setAnyLeft] = useState(true)
+
+    const handleLoadNext = () => {
+        fetchFromApi("/get?" + "limit=" + loadStep + "&offset=" + lastOffset, {})
+            .then(res => res.json().then(fls => {
+                if (fls.length > 0) {
+                    setLines(prev => prev.concat(fls.filter(ls => ls !== null && ls != undefined)).sort((a, b) => a > b ? -1 : a == b ? 0 : 1))
+                    setLastOffset(prev => prev + loadStep)
+
+                    if (fls.length < loadStep) {
+                        setAnyLeft(false)
+                    }
+                } else {
+                    setAnyLeft(false)
+                }
+            }))
+    }
+
+    useEffect(() => {
+        handleLoadNext()
+    }, [])
+
+    return (
+        <div>
+            <table>
+                <thead>
+                    <tr key="header">
+                        <th key="date">When?</th>
+                        <th key="reason">Why?</th>
+                        <th key="toWhat">To what?</th>
+                        <th key="prevDayCount">How long did you last?</th>
+                        <th key="satisfied">Did you even like it?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        lines.map(line => <FailRow key={line.id} failLine={line} />)
+                    }
+                </tbody>
+            </table>
+            <button className="button " onClick={handleLoadNext} disabled={!anyLeft}>Load next {loadStep} fails.</button>
+        </div>
+    )
+}
+
+function FailRow({ failLine }) {
+    return (
+        <tr key={failLine.id}>
+            <td key={failLine.id + "-date"}>{ moment(failLine.date).format("DD.MM.yyyy") }</td>
+            <td key={failLine.id + "-reason"}>{failLine.reason}</td>
+            <td key={failLine.id + "-toWhat"}>{failLine.toWhat}</td>
+            <td key={failLine.id + "-prevDayCount"}>{failLine.prevDayCount}</td>
+            <td key={failLine.id + "-satisfied"}>{(failLine.satisfied) ? "yes" : "no"}</td>
+        </tr>
+    )
+}

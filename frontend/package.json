@@ -1,0 +1,45 @@
+{
+  "name": "my-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "foundation-sites": "^6.7.4",
+    "jquery": "^3.6.0",
+    "js-cookie": "^3.0.1",
+    "moment": "^2.29.1",
+    "react": "17.0.x",
+    "react-dom": "17.0.x",
+    "react-router-dom": "6.0.x"
+  },
+  "devDependencies": {
+    "@babel/core": "7.16.x",
+    "@babel/preset-env": "7.16.x",
+    "@babel/preset-react": "7.16.x",
+    "babel-loader": "8.2.x",
+    "webpack": "5.26.x",
+    "webpack-cli": "^4.9.1"
+  },
+  "scripts": {
+    "build": "webpack --config webpack.prod.config.js",
+    "dev": "set NODE_OPTIONS=--openssl-legacy-provider && webpack --config webpack.dev.config.js --watch --mode=development",
+    "prod": "set NODE_OPTIONS=--openssl-legacy-provider && webpack --config webpack.prod.config.js --mode=production"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

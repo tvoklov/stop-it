@@ -1,0 +1,10 @@
+/.bsp/
+/.idea/
+/.metals/
+/.vscode/
+/project/target/
+/project/project/
+/src/main/resources/application.conf
+/target/
+/project/project/target/config-classes/
+/frontend/node_modules/
