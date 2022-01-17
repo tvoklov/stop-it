@@ -2,7 +2,7 @@ package volk.stopit
 
 import cats.effect._
 import cats.syntax.all._
-import com.comcast.ip4s.{Host, Port}
+import com.comcast.ip4s.{ Host, Port }
 import fs2.Stream
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Router
@@ -15,13 +15,20 @@ object Main extends IOApp {
     for {
       cfg <- Config.cfg
       fss <- Ref.ofEffect(StorageState.from(cfg.fails))
+
       port <-
         Port
           .fromString(cfg.port.getOrElse("8080"))
-          .map(IO(_))
+          .map(IO.pure)
           .getOrElse(
             IO.raiseError(new IllegalArgumentException("Wrong port in config."))
           )
+
+      host <-
+        Host
+          .fromString("0.0.0.0")
+          .map(IO.pure)
+          .getOrElse(IO.raiseError(new IllegalArgumentException("Wrong host.")))
 
       httpApp = Router(
         "/api" -> routes.API.routes(fss),
@@ -31,9 +38,8 @@ object Main extends IOApp {
 
       serverBuilder = EmberServerBuilder
         .default[IO]
-        // don't crucify me for the gets
         .withPort(port)
-        .withHost(Host.fromString("0.0.0.0").get)
+        .withHost(host)
         .withHttpApp(httpApp)
 
       exitCode <- Stream
@@ -43,6 +49,7 @@ object Main extends IOApp {
         .compile
         .drain
         .as(ExitCode.Success)
+
     } yield exitCode
 
 }
