@@ -16,7 +16,7 @@ object Storage {
 
   object StorageState {
 
-    def getLastThings(file: File): IO[(Int, LocalDateTime)] =
+    def getLastThings(file: File): IO[(Int, Option[LocalDateTime])] =
       for {
         files <- IO(file.list())
         maybeLastFile = files.toList.sorted(Ordering.String.reverse).headOption
@@ -28,11 +28,11 @@ object Storage {
               .find(_.nonEmpty)
               .flatMap(decode[FailLine](_).toOption)
               .map(
-                fl => (fl.id, fl.date)
+                fl => (fl.id, Some(fl.date))
               )
-              .getOrElse((0, LocalDateTime.MIN))
+              .getOrElse((0, None))
 
-          case None => IO.pure((0, LocalDateTime.MIN))
+          case None => IO.pure((0, None))
         }
       } yield lastTuple
 
@@ -55,7 +55,7 @@ object Storage {
   case class StorageState(
       lastId: Int,
       path: File,
-      lastDate: LocalDateTime,
+      lastDate: Option[LocalDateTime],
       config: StorageConfig
   )
 

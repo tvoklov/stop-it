@@ -47,7 +47,7 @@ object API {
           cur =>
             cur.copy(
               lastId = cur.lastId + 1,
-              lastDate = LocalDateTime.now()
+              lastDate = Some(LocalDateTime.now())
             )
         )
       } yield done
@@ -58,9 +58,13 @@ object API {
   }
 
   case class FailLineJson(reason: Option[String], toWhat: Option[String], satisfied: Option[Boolean]) {
+
     def toFailLine(ss: StorageState): FailLine = {
-      val now  = LocalDateTime.now()
-      val days = java.time.temporal.ChronoUnit.DAYS.between(ss.lastDate, now).toInt.abs
+      val now = LocalDateTime.now()
+      val days = ss.lastDate.fold(0)(
+        ld => java.time.temporal.ChronoUnit.DAYS.between(ld, now).toInt.abs
+      )
+
       FailLine(
         ss.lastId + 1,
         now,
@@ -70,6 +74,7 @@ object API {
         satisfied.getOrElse(false)
       )
     }
+
   }
 
 }
