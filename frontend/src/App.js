@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM, { render } from 'react-dom'
-import { Fails } from './elements/Fails'
+import { FailsTable } from './elements/Fails'
 import { NewFail } from './elements/NewFail'
 
 import './util/Fetching'
@@ -32,12 +32,10 @@ function App() {
             <div style={ {margin: "1em auto auto"} }>
                 <NewFail onFailReport={() => setRefreshId(id => (id > 100) ? 0 : id + 1)} />
                 <hr />
-                <Fails key={refreshId} />
+                <FailsTable key={refreshId} />
             </div>
         </div>
     )
 }
-
-console.log("HIIIII")
 
 ReactDOM.render(<App />, document.getElementById("app"))
