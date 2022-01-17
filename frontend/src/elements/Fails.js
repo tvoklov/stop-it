@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { fetchFromApi } from '../util/Fetching'
-import { toGoodFormat } from '../util/Date'
-import moment from 'moment'
+import { DateText } from './DateText'
 
-export function Fails({ }) {
+export function FailsTable({ }) {
     const loadStep = 50
     const [lines, setLines] = useState([])
     const [lastOffset, setLastOffset] = useState(0)
@@ -55,7 +54,7 @@ export function Fails({ }) {
 function FailRow({ failLine }) {
     return (
         <tr key={failLine.id}>
-            <td key={failLine.id + "-date"}>{ moment(failLine.date).format("DD.MM.yyyy") }</td>
+            <td key={failLine.id + "-date"}><DateText date={failLine.date} addTooltip={true} /></td>
             <td key={failLine.id + "-reason"}>{failLine.reason}</td>
             <td key={failLine.id + "-toWhat"}>{failLine.toWhat}</td>
             <td key={failLine.id + "-prevDayCount"}>{failLine.prevDayCount}</td>
