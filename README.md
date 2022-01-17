@@ -1,15 +1,15 @@
 # stop-it
-An extremely basic app for behaviour tracking.
+An extremely basic app for behavior tracking.
 
 ## What is this?
 
-A website that lets you document your failures to abstain from an addictive pattern of behaviour. It tries to do so in a quick and simple way: you can simply push the "I fucked up" button to save the fact that you, well, fucked up.
+A website that lets you document your failures to abstain from an addictive pattern of behavior. It tries to do so in a quick and simple way: you can simply push the "I fucked up" button to save the fact that you, well, fucked up.
 
-Even though simply knowing how many days it have been since your last fail might already be more than enough, I would also recommend filling in the text boxes. That data can give you more insight into your addiction. You might notice patterns or even realize that you hate the behaviour more than you like it.
+Even though simply knowing how many days it have been since your last fail might already be more than enough, I would also recommend filling in the text boxes. That data can give you more insight into your addiction. You might notice patterns or even realize that you hate the behavior more than you like it.
 
 Here's a breakdown of each column:
 - `date`: date of fail, duh
-- `reason`: reason for the fail. these can be, for example: stress, a friends' outing, or anything else that made you do/use the addictive behaviour/thing
+- `reason`: reason for the fail. these can be, for example: stress, a friends' outing, or anything else that made you do/use the addictive behavior/thing
 - `using/what did it`: what was used exactly. brand of beer/cigarettes, name of a psychedelic, etc
 - `lost streak`: the number of days that passed since last fail
 - `felt satisfied/did you even like it`: was the experience "worth it". did it give you the buzz that you expected? or have it actually made your day worse?
