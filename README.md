@@ -5,7 +5,7 @@ Quick FAQ:
 1. It looks like this:
    ![preview](stuff/pictures/preview.png)
 2. The default port (8080) can be changed in config (`port=[your desired port`])
-3. The default name ("Stop") can be changed in config (`app-name="[your app name]")
+3. The default name ("Stop") can be changed in config (`app-name="[your app name]"`)
 4. Example config is provided in [config.conf](config.conf)
 
 ### How to run
