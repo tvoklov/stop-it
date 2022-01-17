@@ -1,5 +1,5 @@
 # stop-it
-An extremely barebones and basic app for behaviour tracking.
+An extremely basic app for behaviour tracking.
 
 ## What is this?
 
