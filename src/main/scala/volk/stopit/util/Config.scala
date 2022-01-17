@@ -9,6 +9,7 @@ object Config {
   case class AppConfig(
       fails: StorageConfig,
       appName: Option[String],
+      port: Option[String]
 //      notes: StorageConfig // tbi
   )
 
