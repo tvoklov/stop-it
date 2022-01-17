@@ -60,12 +60,12 @@ object API {
   case class FailLineJson(reason: Option[String], toWhat: Option[String], satisfied: Option[Boolean]) {
     def toFailLine(ss: StorageState): FailLine = {
       val now  = LocalDateTime.now()
-      val days = java.time.temporal.ChronoUnit.DAYS.between(now, ss.lastDate)
+      val days = java.time.temporal.ChronoUnit.DAYS.between(ss.lastDate, now).toInt.abs
       FailLine(
         ss.lastId + 1,
         now,
         reason.getOrElse(""),
-        days.toInt,
+        days,
         toWhat.getOrElse(""),
         satisfied.getOrElse(false)
       )
