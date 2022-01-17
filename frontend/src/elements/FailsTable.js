@@ -33,11 +33,11 @@ export function FailsTable({ }) {
             <table>
                 <thead>
                     <tr key="header">
-                        <th key="date">When?</th>
-                        <th key="reason">Why?</th>
-                        <th key="toWhat">To what?</th>
-                        <th key="prevDayCount">How long did you last?</th>
-                        <th key="satisfied">Did you even like it?</th>
+                        <th key="date">Date</th>
+                        <th key="reason">Reason</th>
+                        <th key="toWhat">Using</th>
+                        <th key="prevDayCount">Lost streak</th>
+                        <th key="satisfied">Felt satisfied</th>
                     </tr>
                 </thead>
                 <tbody>

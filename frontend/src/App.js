@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM, { render } from 'react-dom'
-import { FailsTable } from './elements/Fails'
+import { FailsTable } from './elements/FailsTable'
 import { NewFail } from './elements/NewFail'
 
 import './util/Fetching'
