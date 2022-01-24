@@ -30,7 +30,7 @@ export function FailsTable({ }) {
 
     return (
         <div>
-            <table>
+            <table className="hover unstriped">
                 <thead>
                     <tr key="header">
                         <th key="date">Date</th>
