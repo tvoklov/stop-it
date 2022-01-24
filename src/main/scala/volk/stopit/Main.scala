@@ -32,7 +32,7 @@ object Main extends IOApp {
 
       httpApp = Router(
         "/api" -> routes.API.routes(fss),
-        "info" -> routes.Info.routes(cfg),
+        "info" -> routes.Info.routes(cfg, fss),
         "/"    -> routes.StaticAssets.route
       ).orNotFound
 
