@@ -42,7 +42,7 @@ export function NewFail({ onFailReport }) {
                         <label htmlFor="satisfied">Did you even like it?</label>
                     </section>
 
-                    <button className="submit alert button" onClick={handleFailReport}>I fucked up</button>
+                    <button className="submit alert button" type="button" onClick={handleFailReport}>I fucked up</button>
                 </div>
             </form>
         </div>
