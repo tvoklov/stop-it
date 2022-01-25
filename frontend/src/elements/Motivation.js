@@ -16,8 +16,8 @@ const dayCountToUnit = [
 ]
 
 function formSentence(dCount, [count, unit]) {
-    const beforeUnitStreak = dCount % count
-    const unitStreakCount = Math.ceil(dCount / count)
+    const beforeUnitStreak = count - (dCount % count)
+    const unitStreakCount = dCount == 0 ? 1 : Math.ceil(dCount / count)
     return "Only " + beforeUnitStreak +
         " more " + (beforeUnitStreak == 1 ? "day" : "days") +
         " before a " + unitStreakCount + " " + unit + " streak"
