@@ -4,9 +4,11 @@ import cats.effect._
 import cats.syntax.all._
 import com.comcast.ip4s.{ Host, Port }
 import fs2.Stream
+import io.circe.generic.auto._
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Router
-import volk.stopit.Storage.StorageState
+import volk.stopit.storage.FailLine
+import volk.stopit.storage.Storage.StorageState
 import volk.stopit.util.Config
 
 object Main extends IOApp {
@@ -14,7 +16,7 @@ object Main extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     for {
       cfg <- Config.cfg
-      fss <- Ref.ofEffect(StorageState.from(cfg.fails))
+      fss <- Ref.ofEffect(StorageState.from[FailLine](cfg.fails))
 
       port <-
         Port
@@ -31,8 +33,8 @@ object Main extends IOApp {
           .getOrElse(IO.raiseError(new IllegalArgumentException("Wrong host.")))
 
       httpApp = Router(
-        "/api" -> routes.API.routes(fss),
-        "info" -> routes.Info.routes(cfg, fss),
+        "/api" -> routes.Fail.routes(fss),
+        "/info" -> routes.Info.routes(cfg, fss),
         "/"    -> routes.StaticAssets.route
       ).orNotFound
 

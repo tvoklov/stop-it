@@ -1,18 +1,18 @@
 package volk.stopit.routes
 
-import cats.effect.{ IO, Ref }
+import cats.effect.{IO, Ref}
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.dsl.impl.QueryParamDecoderMatcher
-import volk.stopit.Storage
-import volk.stopit.Storage.{ FailLine, StorageState }
+import volk.stopit.storage.{FailLine, Storage}
+import volk.stopit.storage.Storage.StorageState
 
 import java.time.LocalDateTime
 
-object API {
+object Fail {
 
   private object LimitParamMatcher  extends QueryParamDecoderMatcher[Int]("limit")
   private object OffsetParamMatcher extends QueryParamDecoderMatcher[Int]("offset")
@@ -20,13 +20,13 @@ object API {
   private val dsl = new Http4sDsl[IO] {}
   import dsl._
 
-  def routes(fssRef: Ref[IO, StorageState]): HttpRoutes[IO] = HttpRoutes.of[IO] {
+  def routes(fssRef: Ref[IO, StorageState[FailLine]]): HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "get" :? LimitParamMatcher(limit) :? OffsetParamMatcher(offset) =>
       for {
         fss <- fssRef.get
         done <-
           Storage
-            .readLinesRev(offset, limit)(fss)
+            .readLinesRevGen[FailLine](offset, limit)(fss)
             .map(_.asJson.noSpaces)
             .flatMap(Ok.apply(_))
       } yield done
@@ -59,7 +59,7 @@ object API {
 
   case class FailLineJson(reason: Option[String], toWhat: Option[String], satisfied: Option[Boolean]) {
 
-    def toFailLine(ss: StorageState): FailLine = {
+    def toFailLine(ss: StorageState[FailLine]): FailLine = {
       val now = LocalDateTime.now()
       val days = ss.lastDate.fold(0)(
         ld => java.time.temporal.ChronoUnit.DAYS.between(ld, now).toInt.abs

@@ -1,12 +1,11 @@
-package volk.stopit
+package volk.stopit.storage
 
 import cats.effect.IO
-import io.circe.generic.auto._
-import io.circe.parser._
-import io.circe.syntax._
+import io.circe.Decoder
+import io.circe.parser.decode
 import volk.stopit.util.Config.StorageConfig
 import volk.stopit.util.Utils
-import volk.stopit.util.Utils.{readFileRev, _}
+import volk.stopit.util.Utils.{ fileWriter, readFileRev, OK, Ok }
 
 import java.io.File
 import java.time.LocalDateTime
@@ -16,7 +15,7 @@ object Storage {
 
   object StorageState {
 
-    def getLastThings(file: File): IO[(Int, Option[LocalDateTime])] =
+    def getFromLastElem[T, X](file: File)(whatToReturn: T => X)(implicit decoder: Decoder[T]): IO[Option[X]] =
       for {
         files <- IO(file.list())
         maybeLastFile = files.toList.sorted(Ordering.String.reverse).headOption
@@ -26,34 +25,33 @@ object Storage {
               fullFile <- readFileRev(file, fileName)
             } yield fullFile
               .find(_.nonEmpty)
-              .flatMap(decode[FailLine](_).toOption)
+              .flatMap(decode[T](_).toOption)
               .map(
-                fl => (fl.id, Some(fl.date))
+                fl => whatToReturn(fl)
               )
-              .getOrElse((0, None))
 
-          case None => IO.pure((0, None))
+          case None => IO.pure(None)
         }
       } yield lastTuple
 
-    def from: StorageConfig => IO[StorageState] = {
-      case sc @ StorageConfig(path, _) =>
-        for {
-          file <- path.getOrElse(defaultStoragePath).pipe(new File(_)).pipe(IO(_))
-          ss <-
-            if (file.isFile) IO.raiseError(new IllegalArgumentException("storage path is not a directory"))
-            else
-              for {
-                _          <- IO(if (!file.exists()) file.mkdirs())
-                lastThings <- getLastThings(file)
-                (lastId, lastDate) = lastThings
-              } yield StorageState(lastId, file, lastDate, sc)
-        } yield ss
-    }
+    def from[T <: Storable](sc: StorageConfig)(implicit decoder: Decoder[T]): IO[StorageState[T]] =
+      for {
+        file <- sc.path.getOrElse(defaultStoragePath).pipe(new File(_)).pipe(IO(_))
+        ss <-
+          if (file.isFile) IO.raiseError(new IllegalArgumentException("storage path is not a directory"))
+          else
+            for {
+              _ <- IO(if (!file.exists()) file.mkdirs())
+              lastThings <- getFromLastElem[T, (Long, Option[LocalDateTime])](file)(
+                el => (el.id, Some(el.date))
+              )
+              (lastId, lastDate) = lastThings.getOrElse((0L, None))
+            } yield StorageState[T](lastId, file, lastDate, sc)
+      } yield ss
   }
 
-  case class StorageState(
-      lastId: Int,
+  case class StorageState[T <: Storable](
+      lastId: Long,
       path: File,
       lastDate: Option[LocalDateTime],
       config: StorageConfig
@@ -64,29 +62,25 @@ object Storage {
 
   val defaultStoragePath: String = Utils.getJarDir + File.separator + "storage"
 
-  case class FailLine(id: Int, date: LocalDateTime, reason: String, prevDayCount: Int, toWhat: String, satisfied: Boolean) {
-    def toJson: String = this.asJson.toString()
-  }
-
-  def readLinesRev(offset: Int, limit: Int)(ss: StorageState): IO[List[FailLine]] = {
+  def readLinesRevGen[T](offset: Int, limit: Int)(ss: StorageState[_])(implicit decoder: Decoder[T]): IO[List[T]] = {
     type FileName = String
     type Line     = String
 
-    def go(offsetR: Int, limitR: Int, fileCIO: IO[List[Line]], fileR: List[FileName]): IO[List[FailLine]] =
+    def go(offsetR: Int, limitR: Int, fileCIO: IO[List[Line]], fileR: List[FileName]): IO[List[T]] =
       if (limitR <= 0) IO.pure(Nil)
       else
         for {
           fileC <- fileCIO
           dd <-
             fileR match {
-              case Nil => IO.pure(fileC.slice(offsetR, offsetR + limitR).flatMap(decode[FailLine](_).toOption))
+              case Nil => IO.pure(fileC.slice(offsetR, offsetR + limitR).flatMap(decode[T](_).toOption))
               case next :: xs =>
                 val fileSize = fileC.size
                 for {
                   rest <- go(offsetR - fileSize, limitR - fileSize, readFileRev(ss.path, next), xs)
                 } yield fileC
                   .slice(offsetR, offsetR + limitR)
-                  .flatMap(decode[FailLine](_).toOption) ++ rest
+                  .flatMap(decode[T](_).toOption) ++ rest
             }
         } yield dd
 
@@ -100,7 +94,7 @@ object Storage {
     } yield lines
   }
 
-  def writeLine(line: String)(ss: StorageState): IO[OK] = {
+  def writeLine(line: String)(ss: StorageState[_]): IO[OK] = {
     def newFile(oldName: String = "0.json"): IO[File] = {
       val newCount = oldName.split("\\.").headOption.flatMap(_.toIntOption).getOrElse(0) + 1
       val newName  = s"$newCount.json"
