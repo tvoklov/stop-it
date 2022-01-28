@@ -1,6 +1,6 @@
 package volk.stopit.routes
 
-import cats.effect.{IO, Ref}
+import cats.effect.{ IO, Ref }
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s._

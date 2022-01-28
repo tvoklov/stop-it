@@ -7,8 +7,8 @@ import fs2.Stream
 import io.circe.generic.auto._
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Router
-import volk.stopit.storage.FailLine
 import volk.stopit.storage.Storage.StorageState
+import volk.stopit.storage.{ FailLine, NoteLine }
 import volk.stopit.util.Config
 
 object Main extends IOApp {
@@ -16,7 +16,14 @@ object Main extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     for {
       cfg <- Config.cfg
+
       fss <- Ref.ofEffect(StorageState.from[FailLine](cfg.fails))
+      nss <- cfg.notes match {
+        case Some(c) => Ref.ofEffect(StorageState.from[NoteLine](c)).map(Some(_))
+        case None    => IO.pure(None)
+      }
+
+      _ = println(cfg)
 
       port <-
         Port
@@ -33,9 +40,10 @@ object Main extends IOApp {
           .getOrElse(IO.raiseError(new IllegalArgumentException("Wrong host.")))
 
       httpApp = Router(
-        "/api" -> routes.Fail.routes(fss),
-        "/info" -> routes.Info.routes(cfg, fss),
-        "/"    -> routes.StaticAssets.route
+        "/api/fail" -> routes.Fail.routes(fss),
+        "/api/note" -> nss.fold(routes.Note.notOn)(routes.Note.routes(fss, _)),
+        "/info"     -> routes.Info.routes(cfg, fss),
+        "/"         -> routes.StaticAssets.route
       ).orNotFound
 
       serverBuilder = EmberServerBuilder

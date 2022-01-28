@@ -5,7 +5,7 @@ export function NewFail({ onFailReport }) {
     const [fail, setFail] = useState({})
 
     const handleFailReport = () => {
-        postToApi("/new", fail, {}).then(() => {
+        postToApi("/fail/new", fail, {}).then(() => {
             setFail({})
             onFailReport()
         })

@@ -9,7 +9,7 @@ export function FailsTable({ }) {
     const [anyLeft, setAnyLeft] = useState(true)
 
     const handleLoadNext = () => {
-        fetchFromApi("/get?" + "limit=" + loadStep + "&offset=" + lastOffset, {})
+        fetchFromApi("/fail/get?" + "limit=" + loadStep + "&offset=" + lastOffset, {})
             .then(res => res.json().then(fls => {
                 if (fls.length > 0) {
                     setLines(prev => prev.concat(fls.filter(ls => ls !== null && ls != undefined)).sort((a, b) => a > b ? -1 : a == b ? 0 : 1))

@@ -8,3 +8,5 @@ trait Storable {
 }
 
 case class FailLine(id: Long, date: LocalDateTime, reason: String, prevDayCount: Int, toWhat: String, satisfied: Boolean) extends Storable
+
+case class NoteLine(id: Long, date: LocalDateTime, dayCount: Int, note: String) extends Storable

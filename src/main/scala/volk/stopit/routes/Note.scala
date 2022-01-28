@@ -3,16 +3,16 @@ package volk.stopit.routes
 import cats.effect.{ IO, Ref }
 import io.circe.generic.auto._
 import io.circe.syntax._
-import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.dsl.impl.QueryParamDecoderMatcher
+import org.http4s.{ EntityDecoder, HttpRoutes }
 import volk.stopit.storage.Storage.StorageState
-import volk.stopit.storage.{ FailLine, Storage }
+import volk.stopit.storage.{ FailLine, NoteLine, Storage }
 
 import java.time.LocalDateTime
 
-object Fail {
+object Note {
 
   private object LimitParamMatcher  extends QueryParamDecoderMatcher[Int]("limit")
   private object OffsetParamMatcher extends QueryParamDecoderMatcher[Int]("offset")
@@ -20,16 +20,16 @@ object Fail {
   private val dsl = new Http4sDsl[IO] {}
   import dsl._
 
-  def routes(fssRef: Ref[IO, StorageState[FailLine]]): HttpRoutes[IO] = {
-
-    def load(limit: Int, offset: Int) = for {
-      fss <- fssRef.get
-      done <-
-        Storage
-          .readLinesRevGen[FailLine](offset, limit)(fss)
-          .map(_.asJson.noSpaces)
-          .flatMap(Ok.apply(_))
-    } yield done
+  def routes(fssRef: Ref[IO, StorageState[FailLine]], nssRef: Ref[IO, StorageState[NoteLine]]): HttpRoutes[IO] = {
+    def load(limit: Int, offset: Int) =
+      for {
+        fss <- nssRef.get
+        done <-
+          Storage
+            .readLinesRevGen[NoteLine](offset, limit)(fss)
+            .map(_.asJson.noSpaces)
+            .flatMap(Ok.apply(_))
+      } yield done
 
     HttpRoutes.of[IO] {
       case GET -> Root / "get" :? LimitParamMatcher(limit) :? OffsetParamMatcher(offset) => load(limit, offset)
@@ -38,48 +38,47 @@ object Fail {
 
       case r @ POST -> Root / "new" =>
         for {
+          nss <- nssRef.get
           fss <- fssRef.get
 
-          flj <- r.as[FailLineJson]
+          nlj <- r.as[NoteLineJson]
           done <- {
-            val json = flj.toFailLine(fss).asJson.noSpaces
+            val json = nlj.toNoteLine(nss, fss).asJson.noSpaces
             Storage
-              .writeLine(json)(fss)
+              .writeLine(json)(nss)
               .flatMap(
                 _ => Ok("written")
               )
           }
 
-          _ <- fssRef.update(
-            cur =>
-              cur.copy(
-                lastId = cur.lastId + 1,
-                lastDate = Some(LocalDateTime.now())
-              )
+          _ <- nssRef.update(
+            cur => cur.copy(lastId = cur.lastId + 1)
           )
         } yield done
     }
   }
 
-  private object FailLineJson {
-    implicit val decoder: EntityDecoder[IO, FailLineJson] = jsonOf[IO, FailLineJson]
+  def notOn: HttpRoutes[IO] = HttpRoutes.of[IO] {
+    case _ => NotImplemented("Notes are not turned on in config")
   }
 
-  private case class FailLineJson(reason: Option[String], toWhat: Option[String], satisfied: Option[Boolean]) {
+  private object NoteLineJson {
+    implicit val decoder: EntityDecoder[IO, NoteLineJson] = jsonOf[IO, NoteLineJson]
+  }
 
-    def toFailLine(ss: StorageState[FailLine]): FailLine = {
+  private case class NoteLineJson(note: String) {
+
+    def toNoteLine(ss: StorageState[NoteLine], fss: StorageState[FailLine]): NoteLine = {
       val now = LocalDateTime.now()
-      val days = ss.lastDate.fold(0)(
+      val days = fss.lastDate.fold(0)(
         ld => java.time.temporal.ChronoUnit.DAYS.between(ld, now).toInt.abs
       )
 
-      FailLine(
+      NoteLine(
         ss.lastId + 1,
         now,
-        reason.getOrElse(""),
         days,
-        toWhat.getOrElse(""),
-        satisfied.getOrElse(false)
+        note
       )
     }
 
