@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { FailsTable } from './elements/FailsTable'
-import { NewFail } from './elements/NewFail'
 import { TopBar } from './elements/TopBar'
+import { Fails } from './pages/Fails'
+import { Notes } from './pages/Notes'
 
 import './util/Fetching'
 
 function App() {
-    const [refreshId, setRefreshId] = useState(0)
     const [loaded, setLoaded] = useState(false)
     const [appName, setAppName] = useState("Stop it app")
     const [lastFailDate, setLastFailDate] = useState(null)
+    const [notesOn, setNotesOn] = useState(false)
+
+    const [page, setPage] = useState("fail")
 
     useEffect(() => {
         fetch("/info/full").then(res => {
@@ -19,6 +21,7 @@ function App() {
                     if (info !== undefined && info !== null) {
                         setAppName(info.appName)
                         setLastFailDate(info.lastFailDate)
+                        setNotesOn(info.notesOn)
                         setLoaded(true)
                     }
                 })
@@ -36,17 +39,26 @@ function App() {
                 !loaded ? (<div> Loading </div>) :
                     (
                         <div id="app">
-                            <TopBar appName={appName} lastFailDate={lastFailDate} />
+                            <TopBar appName={appName}
+                                lastFailDate={lastFailDate} notesOn={notesOn}
+                                onChangeToFail={ () => setPage("fail") }
+                                onChangeToNotes={ () => setPage("note") }
+                            />
                             <div style={{ margin: "1em auto auto" }}>
-                                <NewFail onFailReport={() => setRefreshId(id => (id > 100) ? 0 : id + 1)} />
-                                <hr />
-                                <FailsTable key={refreshId} />
+                                { pageOf(page) }
                             </div>
                         </div>
                     )
             }
         </div>
     )
+}
+
+function pageOf(page) {
+    switch (page) {
+        case "fail": return <Fails />
+        case "note": return <Notes />
+    }
 }
 
 ReactDOM.render(<App />, document.getElementById("app"))

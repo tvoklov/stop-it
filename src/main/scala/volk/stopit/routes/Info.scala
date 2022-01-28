@@ -27,7 +27,8 @@ object Info {
           Ok(
             AppInfo(
               cfg.appName.getOrElse(defaultAppName),
-              fss.lastDate
+              fss.lastDate,
+              cfg.notes.nonEmpty
             ).asJson.noSpaces
           )
       } yield res
@@ -35,7 +36,8 @@ object Info {
 
   private case class AppInfo(
       appName: String,
-      lastFailDate: Option[LocalDateTime]
+      lastFailDate: Option[LocalDateTime],
+      notesOn: Boolean
   )
 
 }

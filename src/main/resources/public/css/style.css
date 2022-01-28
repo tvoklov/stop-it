@@ -2,3 +2,12 @@
     background-color: #d3d3d380;
     padding: 0.5em;
 }
+
+.v-separator
+{
+    content: "";
+    display: inline-block;
+    width: 0px;
+    border-left: 1px solid #000000;
+    padding: 0;
+}

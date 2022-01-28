@@ -5,5 +5,7 @@ services:
     image: stopit:latest
     ports:
       - "8080:8080"
+    restart: "unless-stopped" # optional, keeps container running after system reboots
     volumes:
       - your-storage-here:/opt/app/data/storage
+      - your-notes-here:/opt/app/data/notes # optional, if you're using notes
