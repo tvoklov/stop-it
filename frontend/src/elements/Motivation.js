@@ -5,7 +5,7 @@ export function Motivation({ lastFail }) {
     const dateM = moment(lastFail)
 
     return (
-        <span> { toMotivation(moment().diff(dateM, "days")) } </span>
+        <span> {toMotivation(moment().diff(dateM, "days"))} </span>
     )
 }
 
@@ -16,11 +16,16 @@ const dayCountToUnit = [
 ]
 
 function formSentence(dCount, [count, unit]) {
-    const beforeUnitStreak = count - (dCount % count)
-    const unitStreakCount = dCount == 0 ? 1 : Math.ceil(dCount / count)
-    return "Only " + beforeUnitStreak +
-        " more " + (beforeUnitStreak == 1 ? "day" : "days") +
-        " before a " + unitStreakCount + " " + unit + " streak"
+    if (dCount % count == 0)
+        return "Good job! You hit a " + dCount / count + " " + unit + " streak!"
+    else {
+        const beforeUnitStreak = count - (dCount % count)
+        const unitStreakCount = dCount == 0 ? 1 : dCount == count ? 2 : Math.ceil(dCount / count)
+
+        return "Only " + beforeUnitStreak +
+            " more " + (beforeUnitStreak == 1 ? "day" : "days") +
+            " before a " + unitStreakCount + " " + unit + " streak"
+    }
 }
 
 function toMotivation(dCount) {
