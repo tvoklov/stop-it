@@ -16,9 +16,11 @@ const dayCountToUnit = [
 ]
 
 function formSentence(dCount, [count, unit]) {
-    if (dCount % count == 0)
+    if (dCount == 0) {
+        return "First day of your 1 " + unit + " streak"
+    } else if (dCount % count == 0) {
         return "Good job! You hit a " + dCount / count + " " + unit + " streak!"
-    else {
+    } else {
         const beforeUnitStreak = count - (dCount % count)
         const unitStreakCount = dCount == 0 ? 1 : dCount == count ? 2 : Math.ceil(dCount / count)
 
