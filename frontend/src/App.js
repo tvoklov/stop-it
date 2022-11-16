@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { TopBar } from './elements/TopBar'
 import { Fails } from './pages/Fails'
 import { Notes } from './pages/Notes'
@@ -41,11 +41,11 @@ function App() {
                         <div id="app">
                             <TopBar appName={appName}
                                 lastFailDate={lastFailDate} notesOn={notesOn}
-                                onChangeToFail={ () => setPage("fail") }
-                                onChangeToNotes={ () => setPage("note") }
+                                onChangeToFail={() => setPage("fail")}
+                                onChangeToNotes={() => setPage("note")}
                             />
                             <div style={{ margin: "1em auto auto" }}>
-                                { pageOf(page) }
+                                {pageOf(page)}
                             </div>
                         </div>
                     )
@@ -61,4 +61,4 @@ function pageOf(page) {
     }
 }
 
-ReactDOM.render(<App />, document.getElementById("app"))
+createRoot(document.getElementById("app")).render(<App />,)

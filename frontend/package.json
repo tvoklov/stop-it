@@ -7,16 +7,15 @@
     "jquery": "^3.6.0",
     "js-cookie": "^3.0.1",
     "moment": "^2.29.1",
-    "react": "17.0.x",
-    "react-dom": "17.0.x",
-    "react-router-dom": "6.0.x"
+    "react": "18.x",
+    "react-dom": "18.x"
   },
   "devDependencies": {
     "@babel/core": "7.16.x",
     "@babel/preset-env": "7.16.x",
     "@babel/preset-react": "7.16.x",
     "babel-loader": "8.2.x",
-    "webpack": "5.26.x",
+    "webpack": "5.x.x",
     "webpack-cli": "^4.9.1"
   },
   "scripts": {
